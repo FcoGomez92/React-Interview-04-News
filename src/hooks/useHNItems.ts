@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react'
 import { getItemInfo } from '../services/hacker-news'
+import { type ItemID, type CommentItemResponse, type StoryItemResponse } from '../types'
 
-export const useHNItems = (id, isComments) => {
-  const [data, setData] = useState(null)
+export const useHNItems = (id: ItemID, isComments?: boolean) => {
+  const [data, setData] = useState<CommentItemResponse | StoryItemResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(false)
+  const [error, setError] = useState('')
 
   const loadInfo = async () => {
     setIsLoading(true)
     const result = await getItemInfo(id, isComments)
 
-    if (result.error) {
+    if ('error' in result) {
       setError(result.error)
       setIsLoading(false)
       return
@@ -19,13 +20,13 @@ export const useHNItems = (id, isComments) => {
     setIsLoading(false)
   }
 
-  const reloadInfo = async () => {
-    setError(false)
-    loadInfo()
+  const reloadInfo = () => {
+    setError('')
+    void loadInfo()
   }
 
   useEffect(() => {
-    loadInfo()
+    void loadInfo()
   }, [])
 
   return { data, isLoading, error, reloadInfo }

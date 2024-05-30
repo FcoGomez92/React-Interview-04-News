@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { getStoriesIds } from '../services/hacker-news'
+import { type TopStoriesResponse } from '../types'
+
 const MAX_PAGE = 50
 
 export const useTopStories = () => {
   const page = useRef(1)
-  const [data, setData] = useState([])
-  const [error, setError] = useState(false)
+  const [data, setData] = useState<TopStoriesResponse>([])
+  const [error, setError] = useState('')
 
   const getData = async () => {
     const result = await getStoriesIds()
 
-    if (result.error) {
+    if ('error' in result) {
       setError(result.error)
       return
     }
@@ -23,16 +25,20 @@ export const useTopStories = () => {
       setError('All results loaded')
       return
     }
-    const results = await getStoriesIds(newPage)
+    const result = await getStoriesIds(newPage)
+    if ('error' in result) {
+      setError(result.error)
+      return
+    }
     setData((prev) => {
-      const newResults = prev.concat(results)
+      const newResults = prev.concat(result)
       page.current = newPage
       return newResults
     })
   }
 
   useEffect(() => {
-    getData()
+    void getData()
   }, [])
 
   return { data, error, loadMore }

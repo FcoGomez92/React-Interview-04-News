@@ -5,11 +5,15 @@ import { Story } from '../components/Story'
 
 export default function TopStories () {
   const { data, error, loadMore } = useTopStories()
-  const buttonRef = useRef(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
 
   const handleClick = () => {
-    loadMore()
-    setTimeout(() => buttonRef.current.scrollIntoView({ behavior: 'smooth' }), 200)
+    void loadMore()
+    setTimeout(() => {
+      if (buttonRef.current !== null) {
+        buttonRef.current.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 200)
   }
 
   return (
@@ -26,7 +30,7 @@ export default function TopStories () {
           <StyledButton ref={buttonRef} onClick={handleClick}>Load More</StyledButton>
         </>
       )}
-      {error && <p>{error}</p>}
+      {error !== '' && <p>{error}</p>}
     </>
   )
 }
